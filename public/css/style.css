@@ -241,6 +241,7 @@ label[for='toggle-all'] {
 
 .todo-list li .destroy:after {
 	content: '×';
+	cursor: pointer;
 }
 
 .todo-list li:hover .destroy {
