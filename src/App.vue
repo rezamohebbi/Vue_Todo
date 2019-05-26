@@ -1,13 +1,13 @@
 <template>
 
   <div id="app">
-    <app-head></app-head>
+    <!-- <app-head></app-head> -->
 
 
     <app-body></app-body>
 
 
-    <app-footer></app-footer>
+    <!-- <app-footer></app-footer> -->
   </div>
 
 

@@ -2,8 +2,8 @@
     <div>
         <section class="todoapp">
             <header class="header">
-                <h1>todos</h1>
-                <input :ref=" 'taskInput' " @keydown.enter="addTask()" class="new-todo" autofocus autocomplete="off" placeholder="چه کاری میخواهی انجام بدهی ؟">
+                <h1>اطلاعیه ها</h1>
+                <input :ref=" 'taskInput' " @keydown.enter="addTask()" class="new-todo" autofocus autocomplete="off" placeholder="اطلاعیه جدید...">
             </header>
 
             
@@ -11,13 +11,13 @@
                 <input class="toggle-all" type="checkbox">
                 <ul class="todo-list">
 
-                    <li v-for=" (task, index) in tasks " :class="['todo']" :key="index">
+                    <li v-for=" (task, index) in temp " :class="{completed: task.completed, editing: editItem == task}" :key="index">
                         <div class="view">
                             <input v-model="task.completed" class="toggle" type="checkbox" :checked=" task.completed == true ? 'checked' : '' ">
-                            <label>{{ task.title }}</label>
+                            <label @dblclick="startEditingItem(task)">{{ task.title }}</label>
                             <button @click="removeTask(index)" class="destroy"></button>
                         </div>
-                        <input class="edit" type="text">
+                        <input @blur="finishEditing(task, index)" @keydown.enter="finishEditing(task, index)" v-model="task.title" class="edit" type="text">
                     </li>
 
                 </ul>
@@ -26,15 +26,15 @@
 
             <footer class="footer">
                 <span class="todo-count">
-                    <strong>{{ tasks.length }}</strong> مورد
+                    <strong>{{ temp.length }}</strong> مورد
                 </span>
                 <ul class="filters">
-                    <li><a @click.prevent="allTasks()" href="#/all" >همه</a></li>
-                    <li><a href="#/active" >فعال</a></li>
-                    <li><a @click.prevent="completedTasks()" href="#/completed" >انجام شده</a></li>
+                    <li><a @click="doFilter('all')" >همه</a></li>
+                    <li><a @click="doFilter('active')" >ناتمام ها</a></li>
+                    <li><a @click="doFilter('completed')" >انجام شده</a></li>
                 </ul>
                 <button @click="removeCompletedTasks()" class="clear-completed">
-                    پاک کردن انجام شده ها
+                    پاک کردن منسوخ شده ها
                 </button>
             </footer>
         </section>
@@ -43,14 +43,15 @@
 
 
 <script>
+
+
 export default {
     name: 'app-body',
     data(){
         return {
-            tasks: [
-                
-            ],
+            tasks: [],
             temp: [],
+            editItem: false
         }
     },
     methods: {
@@ -64,14 +65,47 @@ export default {
             }
             
         },
-        completedTasks(){
-            this.tasks = this.tasks.filter( (task) => {
-                return task.completed == true;
-            } );            
+
+
+
+        doFilter(visibility){
+            if ( visibility == 'all' ) {    
+
+                this.temp = this.tasks;
+
+            }else if( visibility == 'active' ){
+
+                // uncompleted actions
+                this.temp = this.tasks.filter( (task) => {
+                    return task.completed == false;
+                } );
+
+            }else{
+                this.temp = this.tasks.filter( (task) => {
+                    return task.completed == true;
+                } );
+            }
         },
-        allTasks(){
-            this.tasks = this.temp;
+
+        startEditingItem(task){
+            this.editItem = task;
         },
+
+        finishEditing(task, index){
+            if ( !this.editItem )
+            {
+                return;
+            }
+            if ( task.title.length < 1 )
+            {
+                this.removeTask(index);
+            }
+
+            this.editItem = false;
+        },
+
+
+
 
         removeTask(pos){
             this.tasks.filter( (value, index) => {
@@ -82,7 +116,6 @@ export default {
 
             this.temp = this.tasks;
         },
-
         removeCompletedTasks(){
             let uncompletedTasks = this.tasks.filter( (value, index) => {
                 if ( value.completed == true )
@@ -90,17 +123,6 @@ export default {
                     this.tasks.splice(index, 1);
                 }
             });
-
-            // console.log(uncompletedTasks);
-            
-            
-            // this.tasks.forEach((element, index) => {
-            //    if ( element.completed == true )
-            //    {
-            //        this.tasks.splice(index, 1);
-            //        console.log("A");
-            //    }
-            // });
 
             this.temp = this.tasks;
         },
